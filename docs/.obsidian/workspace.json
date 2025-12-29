@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "APIs/check_customer_limit.md",
+                "file": "README.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "check_customer_limit"
+              "title": "README"
             }
           }
         ],
@@ -200,8 +200,8 @@
   },
   "active": "ce3bb48bd84c6d9a",
   "lastOpenFiles": [
-    "APIs/update_customer_limit.md",
     "APIs/check_customer_limit.md",
+    "APIs/update_customer_limit.md",
     "APIs/add_customer.md",
     "APIs/check_customer_kyc.md",
     "APIs/customer_registration_status.md",
