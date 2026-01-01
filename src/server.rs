@@ -6,6 +6,7 @@ use crate::routes::ping::{ping_get, ping_post};
 use crate::routes::update_customer::update_customer_handler;
 use crate::routes::update_customer_limit::handle_update_customer_limit;
 use crate::store::{CustomerInfo, deserialize_from_json_string, load_or_create_file};
+use crate::ui::login::handle_login;
 use axum::{
     Router,
     routing::{get, post},
@@ -22,7 +23,8 @@ pub async fn start_server() {
     let shared_state: Arc<RwLock<Vec<CustomerInfo>>> = Arc::new(RwLock::new(customers));
 
     let app: Router = Router::new()
-        .route("/", get(ping_get).post(ping_post))
+        .route("/", get(ping_get).post(ping_post))      // here we can host the static UI content
+        .route("/login", post(handle_login))
         .route(
             "/axis/non-dmz/api/PPIM/v1/add-customer",
             post(add_customer_handler),
