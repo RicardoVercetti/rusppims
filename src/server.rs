@@ -11,6 +11,7 @@ use axum::{
     Router,
     routing::{get, post},
 };
+use tower_http::cors::{CorsLayer, Any};
 use std::sync::Arc;
 use tokio::{net::TcpListener, sync::RwLock};
 
@@ -21,6 +22,12 @@ pub async fn start_server() {
 
     // Wrap in Arc<RwLock>
     let shared_state: Arc<RwLock<Vec<CustomerInfo>>> = Arc::new(RwLock::new(customers));
+
+    // cors
+    let cors = CorsLayer::new()
+    .allow_origin(Any)
+    .allow_methods(Any)
+    .allow_headers(Any);
 
     let app: Router = Router::new()
         .route("/", get(ping_get).post(ping_post))      // here we can host the static UI content
@@ -37,7 +44,8 @@ pub async fn start_server() {
             post(update_customer_handler),
         ) // update customer
         .route("/axis/non-dmz/api/PPIM/v1/update-customer-limit", post(handle_update_customer_limit))             // update customer limit
-        .with_state(shared_state.clone());
+        .with_state(shared_state.clone())
+        .layer(cors);
 
     // run our app with hyper, listening globally on port 3000
     let port: &str = "0.0.0.0:3000";
