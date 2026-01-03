@@ -1,9 +1,15 @@
+import { useState } from "react";
+import ScientistGallery from "./pages/AmazingScientists";
+import Login from "./pages/Login";
+
 function App() {
+
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   return (
-    <div>
-      <h1>Dummy page</h1>
-    </div>
+    <>
+    { isLoggedIn ? <ScientistGallery/> : <Login setLogin={setIsLoggedIn}/>}
+    </>
   )
 }
 
-export default App
+export default App;
