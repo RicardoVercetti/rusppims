@@ -15,7 +15,7 @@ async function login(body: {username: string, password: string}) {
   });
   if (!res.ok) {
     console.log("response is not OK");
-    throw Error("Login failed");
+    throw Error("Invalid credentials");
   }
 
   console.log("response is OK");
@@ -39,6 +39,7 @@ export default function Login({setLogin} : LoginProps) {
 
         } catch (err) {
             console.log(err);
+            alert("connection failed");
         }
     }
 
