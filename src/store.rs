@@ -6,10 +6,11 @@ use tokio::{
     fs::{File, metadata, read_to_string},
     io::AsyncWriteExt,
 };
+use sqlx::FromRow;
 
 use crate::routes::add_customer::AddCustomer;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, FromRow)]
 pub struct CustomerInfo {
     pub unique_id: String, // this is the ppid
     pub customer_name: String,
