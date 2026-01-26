@@ -27,7 +27,7 @@ Full KYC has no limits while the min KYC has max spend of 10_000 per month.
 
 ### The Goal
 
-- [ ] Have the basic PPIMS functionality to server as a dummy for DCMS(the project I'm working on professionally)
+- [X] Have the basic PPIMS functionality to server as a dummy for DCMS(the project I'm working on professionally)
 - [ ] Test the smoothness of applications built in rust.
 - [ ] Tryout simple and minimal UI building
 - [ ] Try huge amount(in lakhs) of data using SQLite

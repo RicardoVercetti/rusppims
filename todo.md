@@ -17,11 +17,11 @@ Using this I wanna learn handling http requests, basic serialization and deseria
 - [ ] have the KYC restrictions enabled
 - [ ] no std logs or err logs, full async
 - [x] optional json params
-- [ ] document the request response messages
-- [ ] complete all request response messages
-- [ ] pretty print json request - response
+- [X] document the request response messages
+- [X] complete all request response messages
+- [X] pretty print json request - response
 - [ ] frontend in react for PPIMS
-- [ ] async APIs for the react UI - sign-in with hardcoded credentials
+- [X] async APIs for the react UI - sign-in with hardcoded credentials
 - [ ] UI Home page - Top customers, all Customers
 - [ ] UI transactions - sort from last received to backwards
 - [ ] UI transactions - list by transaction type(all, create customer, update limit, etc)
