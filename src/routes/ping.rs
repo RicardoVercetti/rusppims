@@ -1,8 +1,7 @@
-use crate::{store::CustomerInfo, utils};
+use crate::{database::db, utils};
 use axum::{Json, extract::State};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use tokio::sync::RwLock;
+use sqlx::{Pool, Sqlite};
 
 // simple pings
 
@@ -22,15 +21,19 @@ pub async fn ping_get() -> String {
 }
 
 pub async fn ping_post(
-    State(state): State<Arc<RwLock<Vec<CustomerInfo>>>>,
+    State(pool): State<Pool<Sqlite>>,
     Json(payload): Json<PingPostData>,
 ) -> Json<PingPostResponse> {
     utils::print_req_res(&payload, "req");
     // you can do something with the data ya know!
 
-    let data: tokio::sync::RwLockReadGuard<'_, Vec<CustomerInfo>> = state.read().await;
+    let data = db::get_all_customers(&pool).await;
+    match data {
+        Ok(customers) => println!("all customer info: {:#?}", customers),
+        Err(err) => println!("error: {}", err),
+    }
 
-    println!("all customer info: {:#?}", data);
+    
 
     Json(PingPostResponse {
         message: "Request received successfully".to_string(),

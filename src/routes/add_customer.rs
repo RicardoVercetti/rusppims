@@ -1,8 +1,14 @@
-use crate::{store::{CustomerInfo, generate_ppid, save_to_file}, utils::{ is_customer_exits_by_mobile_number, print_req_res}};
+use crate::{
+    database::db, 
+    store::{
+        CustomerInfo, 
+        generate_ppid
+    }, 
+    utils::print_req_res
+};
 use axum::{Json, extract::State};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use tokio::sync::RwLock;
+use sqlx::{Pool, Sqlite};
 
 // add customer
 #[derive(Serialize, Deserialize, Debug)]
@@ -176,23 +182,32 @@ pub struct AddCustomerResponseLinks {}
 pub struct AddCustomerResponseMeta {}
 
 pub async fn add_customer_handler(
-    State(state): State<Arc<RwLock<Vec<CustomerInfo>>>>,
+    State(pool): State<Pool<Sqlite>>,
     Json(payload): Json<AddCustomerRequst>,
 ) -> Json<AddCustomerResponse> {
     // request should be successfully received
     print_req_res(&payload, "req");
     let in_data = &payload.data.add_customer;
 
-    // get customer data and check id
-    let customer_data = state.read().await;
+    let is_customer_exits = db::get_customer_by_mobile_number(&pool, &payload.data.add_customer.mobile_number).await;
 
-    // dedupe check for if customer exists with the same mobile number
-    let is_customer_exist = is_customer_exits_by_mobile_number(
-        &payload.data.add_customer.mobile_number,
-        &customer_data,
-    );
-    drop(customer_data);
-    if !is_customer_exist {
+    if let Err(err) = is_customer_exits {
+        println!("Error occurred: {}", err);
+        let res = AddCustomerResponse::new(
+            "400",
+            "N/A",
+            "N/A",
+            "N/A",
+            "N/A",
+        );
+        print_req_res(&res, "res");
+        return Json(res);
+    }
+
+    let is_customer_exists = is_customer_exits.unwrap();
+
+
+    if let None = is_customer_exists {
         // must generate PPID and save the same
         let ppid = generate_ppid();
         println!("generated ppid: {}", ppid);
@@ -200,38 +215,52 @@ pub async fn add_customer_handler(
         // map the AddCustomer to CustomerInfo
 
         let customer_info_map = CustomerInfo::new(in_data, &ppid);
-        let mut customers = state.write().await;
 
         // add to vec
-        customers.push(customer_info_map);
-
-        // async save to file
-        let save_res = save_to_file(&customers).await;
-        match save_res {
-            Err(e) => println!("error occurred while saving the file: {}", e),
-            _ => {}
+        let insert_resp = db::insert_customer(&pool, &customer_info_map).await;
+        
+        match insert_resp {
+            Ok(_) => {
+                    let res = AddCustomerResponse::new(
+                    "000",
+                    &ppid,
+                    &in_data.kyc_flag,
+                    &in_data.kyc_updated_channel,
+                    option_alt(&in_data.kyc_updated_on),
+                );
+            println!("res: {:#?}", res);
+            return Json(res);
+            },
+            Err(err) => {
+                println!("error while inserting the customer data: {}", err);
+                let res = AddCustomerResponse::new(
+                    "400",
+                    &ppid,
+                    &in_data.kyc_flag,
+                    &in_data.kyc_updated_channel,
+                    option_alt(&in_data.kyc_updated_on),
+                );
+                println!("res: {:#?}", res);
+                return Json(res);
+            }
         }
-
-        let res = AddCustomerResponse::new(
-            "000",
-            &ppid,
-            &in_data.kyc_flag,
-            &in_data.kyc_updated_channel,
-            option_alt(&in_data.kyc_updated_on),
+        
+    } else if let Some(customer) = is_customer_exists {
+            let res = AddCustomerResponse::new(
+            "200",              // customer already exists
+            &customer.unique_id,
+            &customer.kyc_flag,
+            &customer.kyc_updated_channel,
+            option_alt(&customer.kyc_updated_on),
         );
-        println!("res: {:#?}", res);
-        return Json(res);
-    }
 
-    let res = AddCustomerResponse::new(
-        "400",
-        option_alt(&in_data.unique_id),
-        &in_data.kyc_flag,
-        &in_data.kyc_updated_channel,
-        option_alt(&in_data.kyc_updated_on),
-    );
-    print_req_res(&res, "res");
-    Json(res)
+        println!("customer already exists: {}", customer.unique_id);
+
+        print_req_res(&res, "res");
+        Json(res)
+    } else {
+        unimplemented!("this is an impossible condition");
+    }
 }
 
 fn option_alt(opt: &Option<String>) -> &str {
