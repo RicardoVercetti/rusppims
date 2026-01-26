@@ -148,6 +148,7 @@ mod tests {
     [
         {
             "unique_id": "123",
+            "customer_name": "Micheal",
             "maiden_name": "Doe",
             "mobile_number": "555111222",
             "date_of_birth": "1990-01-01",
@@ -161,12 +162,14 @@ mod tests {
             "kyc_updated_on": "2024-01-02",
             "ovid_value": "something",
             "ovid_type": "type",
-            "cif_id": "99887"
+            "cif_id": "99887",
+            "consumed": 1
         }
     ]
     "#;
 
         let data = deserialize_from_json_string(json).unwrap();
-        println!("{:#?}", data);
+        // println!("{:#?}", data);
+        assert_eq!(data.get(0).unwrap().unique_id, "123");
     }
 }
