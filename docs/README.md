@@ -1,15 +1,17 @@
 ## Rusppims
 
 ### About
-The PPI dubbed prepaid payment instrument is the RBI system to regulate limits in spendings on Indian government regulated financial processors. PPI has hold of customer information, account information, spending, and the maximum amount the customer can possibly spend on a month based on the KYC of the customer.
+> The PPI(dubbed prepaid payment instrument) is the RBI system to regulate limits in spendings on Indian government regulated financial transaction processors. 
+
 
 ### Overview
-
-The rust implementation of something called a prepaid system(PPIMS)
-Over 6 APIs are hosted for the purpose of maintaining the transaction guide line limits of RBI.
+- The rust implementation of something called a prepaid system(PPIMS).
+- PPI has hold of customer information, account information, spending, and the maximum amount the customer can possibly spend on a month based on the KYC of the customer. 
+- The KYC is defined based on if the Aadhar, PAN number or Driving License is linked to the customer. Without/before any of these linking, the customer will have Min KYC(Y1) where they can spend upto 10K(Rupees) per month. Anything above will be declined. 
+- If the customer links their aadhar or other government IDs, their account gets upgraded to Full-KYC(Y3) where they can spend upto 200k(Rupees).
 
 ### Usage
-
+- Over 6 APIs are hosted for the purpose of maintaining the transaction guide line limits of RBI.
 - The Customer have to be on-boarded using the [Add customer](./APIs/add_customer.md) API and then transactions can be made for the customer for a specific KYC.
 - Here are 3 different KYC options available - Min KYC, New Min KYC & full KYC.
 Full KYC has no limits while the min KYC has max spend of 10_000 per month.
