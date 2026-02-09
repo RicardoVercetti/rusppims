@@ -1,6 +1,6 @@
 use crate::database::db::init_db;
 use crate::routes::add_customer::add_customer_handler;
-// use crate::routes::check_customer::check_customer_status_handler;
+use crate::routes::check_customer::check_customer_status_handler;
 // use crate::routes::check_customer_kyc::handle_check_customer_kyc;
 // use crate::routes::check_customer_limit::handle_check_customer_limit;
 use crate::routes::ping::{ping_get, ping_post};
@@ -46,7 +46,7 @@ pub async fn start_server() {
         )
         // .route("/axis/non-dmz/api/PPIM/v1/check-customer-kyc", post(handle_check_customer_kyc))                // check customer kyc
         // .route("/axis/non-dmz/api/PPIM/v1/check-customer-limit", post(handle_check_customer_limit))              // check customer limit
-        // .route("/axis/non-dmz/api/PPIM/v1/customer-registration-status", post(check_customer_status_handler))      // check customer registration status
+        .route("/axis/non-dmz/api/PPIM/v1/customer-registration-status", post(check_customer_status_handler))      // check customer registration status
         // .route(
             // "/axis/non-dmz/api/PPIM/v1/update-customer",
             // post(update_customer_handler),

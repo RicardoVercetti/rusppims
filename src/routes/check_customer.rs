@@ -1,35 +1,44 @@
-use std::sync::Arc;
-
 use axum::{Json, extract::State};
-use serde::{Deserialize, Serialize};
-use tokio::sync::RwLock;
+use sqlx::{Pool, Sqlite};
+use serde::{Serialize, Deserialize};
 
-use crate::{store::CustomerInfo, utils::{self, find_by_mobile_number}};
+use crate::{
+    store::CustomerInfo,
+    utils,
+    database::db::get_customer_by_mobile_number, // adjust module path if needed
+};
 
 // request handler
 pub async fn check_customer_status_handler(
-    State(_state): State<Arc<RwLock<Vec<CustomerInfo>>>>,
+    State(pool): State<Pool<Sqlite>>,
     Json(payload): Json<CheckCustomerStatusRequest>,
 ) -> Json<CheckCustomerResponse> {
+
     utils::print_req_res(&payload, "req");
 
-    let customer_mob_req = &payload.data.check_reg_status.mobile_number;
+    let mobile_number = &payload
+        .data
+        .check_reg_status
+        .mobile_number;
 
-    let customer_infos = _state.read().await;
-
-    let found = find_by_mobile_number(&customer_mob_req, &customer_infos);
-
-    match found {
-        Some(c) => {
-            let res = CheckCustomerResponse::new("000".to_string(), c.unique_id.to_string());
+    match get_customer_by_mobile_number(&pool, mobile_number).await {
+        Ok(Some(customer)) => {
+            let res = CheckCustomerResponse::from_customer("000", &customer);
             utils::print_req_res(&res, "res");
-            return Json(res);
-        },
+            Json(res)
+        }
 
-        None => {
+        Ok(None) => {
+            let res = CheckCustomerResponse::new("404".to_string(), "NA".to_string());
+            utils::print_req_res(&res, "res");
+            Json(res)
+        }
+
+        Err(err) => {
+            eprintln!("DB error: {:?}", err);
             let res = CheckCustomerResponse::new("500".to_string(), "NA".to_string());
             utils::print_req_res(&res, "res");
-            return Json(res);
+            Json(res)
         }
     }
 }
@@ -135,16 +144,39 @@ pub struct CheckCustomerResponse {
 }
 
 impl CheckCustomerResponse {
+    fn from_customer(resp_code: &str, customer: &CustomerInfo) -> Self {
+        CheckCustomerResponse {
+            data: CheckCustomerStatusResponseData {
+                resp_code: resp_code.to_string(),
+                unique_id: customer.unique_id.clone(),
+                kyc_flag: customer.kyc_flag.clone(),
+                kyc_updated_channel: customer.kyc_updated_channel.clone(),
+                kyc_updated_on: customer.kyc_updated_on.clone().unwrap_or_else(|| "NA".to_string()),
+                cif_id: customer.cif_id.clone().unwrap_or_else(|| "NA".to_string()),
+                remaining_avail_limit: format!("{:.2}", 0.0),
+                utilized_bal: format!("{:.2}", customer.consumed),
+            },
+            risk: Risk {},
+            links: Links {},
+            meta: Meta {},
+        }
+    }
+
     fn new(resp_code: String, unique_id: String) -> Self {
-        CheckCustomerResponse { data: CheckCustomerStatusResponseData {
-            resp_code: resp_code,
-            unique_id: unique_id,
-            kyc_flag: "NA".to_string(),
-            kyc_updated_channel: "NA".to_string(),
-            kyc_updated_on: "NA".to_string(),
-            cif_id: "NA".to_string(),
-            remaining_avail_limit: "0.00".to_string(),
-            utilized_bal: "0.00".to_string()
-        }, risk: Risk {  }, links: Links {  }, meta: Meta {  } }
+        CheckCustomerResponse {
+            data: CheckCustomerStatusResponseData {
+                resp_code,
+                unique_id,
+                kyc_flag: "NA".to_string(),
+                kyc_updated_channel: "NA".to_string(),
+                kyc_updated_on: "NA".to_string(),
+                cif_id: "NA".to_string(),
+                remaining_avail_limit: "0.00".to_string(),
+                utilized_bal: "0.00".to_string(),
+            },
+            risk: Risk {},
+            links: Links {},
+            meta: Meta {},
+        }
     }
 }
