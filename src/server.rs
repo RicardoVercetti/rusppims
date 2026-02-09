@@ -4,6 +4,7 @@ use crate::routes::check_customer::check_customer_status_handler;
 // use crate::routes::check_customer_kyc::handle_check_customer_kyc;
 // use crate::routes::check_customer_limit::handle_check_customer_limit;
 use crate::routes::ping::{ping_get, ping_post};
+use crate::ui::dashboard_data::handle_dashboard;
 // use crate::routes::update_customer::update_customer_handler;
 // use crate::routes::update_customer_limit::handle_update_customer_limit;
 // use crate::store::{CustomerInfo, deserialize_from_json_string, load_or_create_file};
@@ -39,7 +40,11 @@ pub async fn start_server() {
 
     let app: Router = Router::new()
         .route("/", get(ping_get).post(ping_post))      // here we can host the static UI content
+        // UI APIs
         .route("/login", post(handle_login))
+        .route("/dashboard", get(handle_dashboard))
+        
+        // CORE APIs
         .route(
             "/axis/non-dmz/api/PPIM/v1/add-customer",
             post(add_customer_handler),

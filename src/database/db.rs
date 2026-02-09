@@ -1,6 +1,6 @@
 use sqlx::{Pool, Sqlite, SqlitePool, sqlite::SqliteQueryResult};
 
-use crate::store::CustomerInfo;
+use crate::{store::CustomerInfo, ui::dashboard_data::DashboardData};
 
 pub async fn init_db() -> SqlitePool {
     // let base = std::env::current_dir().unwrap().join("data.db");
@@ -204,4 +204,37 @@ pub async fn get_all_customers(
     )
     .fetch_all(pool)
     .await
+}
+
+pub async fn fetch_dashboard_data(
+    pool: &Pool<Sqlite>,
+) -> Result<DashboardData, sqlx::Error> {
+
+    let total_customers: (i64,) =
+        sqlx::query_as("SELECT COUNT(*) FROM customer_profile")
+            .fetch_one(pool)
+            .await?;
+
+    let kyc_y1: (i64,) =
+        sqlx::query_as("SELECT COUNT(*) FROM customer_profile WHERE kyc_flag = 'N'")
+            .fetch_one(pool)
+            .await?;
+
+    let kyc_y2: (i64,) =
+        sqlx::query_as("SELECT COUNT(*) FROM customer_profile WHERE kyc_flag = 'P'")
+            .fetch_one(pool)
+            .await?;
+
+    let kyc_y3: (i64,) =
+        sqlx::query_as("SELECT COUNT(*) FROM customer_profile WHERE kyc_flag = 'F'")
+            .fetch_one(pool)
+            .await?;
+
+    Ok(DashboardData {
+        transactions_today: 0, // todo
+        total_customers: total_customers.0,
+        kyc_y1: kyc_y1.0,
+        kyc_y2: kyc_y2.0,
+        kyc_y3: kyc_y3.0,
+    })
 }
