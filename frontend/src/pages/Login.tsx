@@ -1,58 +1,82 @@
 import { useState } from "react";
+import "./css/login.css";
 
 interface LoginProps {
-    setLogin: (val: boolean) => void
+  setLogin: (val: boolean) => void;
 }
 
-async function login(body: {username: string, password: string}) {
+async function login(body: { username: string; password: string }) {
   const url = "http://localhost:3000/login";
-  const res =  await fetch(url, {
+  const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+
   if (!res.ok) {
-    console.log("response is not OK");
-    throw Error("Invalid credentials");
+    throw new Error("Invalid credentials");
   }
 
-  console.log("response is OK");
-  const data = await res.json();
-  return data;
+  return res.json();
 }
 
-export default function Login({setLogin} : LoginProps) {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();     
-        console.log(`username: ${username}`);
-        console.log(`password: ${password}`);
-        
-        try {
-            const data = await login({username, password});
-            console.log("data: ", data);
-            setLogin(true);
-            console.log("set login already")
+export default function Login({ setLogin }: LoginProps) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-        } catch (err) {
-            console.log(err);
-            alert("connection failed");
-        }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await login({ username, password });
+      setLogin(true);
+    } catch (err) {
+      alert("Login failed: " + err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-        <div className="container">
-        <div className="form">
-            <form onSubmit={handleSubmit}>
-            <h3>Sign in to PPIMS</h3>
-            <input id="name" type="text" value={username} placeholder="Username" onChange={e => setUsername(e.target.value)} required/>
-            <input id="pass" type="password" value={password} placeholder="Password" onChange={e => setPassword(e.target.value)} required/>
-            <button type="submit">Submit</button>
-            </form>
+  return (
+    <div className="login-wrapper">
+      <div className="login-card">
+        <h2 className="title">PPIMS</h2>
+        <p className="subtitle">Sign in to your account</p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Username</label>
+            <input
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Login"}
+          </button>
+        </form>
+
+        <div className="footer-text">
+          © 2026 PPIMS • Payment Limits Platform
         </div>
-        </div>
-    )
+      </div>
+    </div>
+  );
 }

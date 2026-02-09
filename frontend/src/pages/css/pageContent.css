@@ -1,0 +1,87 @@
+.content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.content-header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.content-header p {
+  opacity: 0.8;
+  margin-bottom: 2rem;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  padding: 1.2rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 1.6rem;
+  margin-top: 0.4rem;
+}
+
+/* Modules */
+.modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1.2rem;
+}
+
+.module-card {
+  padding: 1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #020617;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-4px);
+}
+
+
+.stat-title {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.8rem;
+  margin-top: 0.4rem;
+}
+
+.kyc-breakdown {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.kyc-breakdown div strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.error-text {
+  color: #f87171;
+  font-weight: 500;
+}

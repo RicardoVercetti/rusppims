@@ -1,17 +1,12 @@
-import PageContent from "./PageContent";
 import SideBar from "./SideBar";
+import PageContent from "./PageContent";
+import "./css/home.css";
 
 export default function Home() {
-    return (
-        <div style={homeStyle} className="main-page">
-            <SideBar/>
-            <PageContent/>
-        </div>        
-    );
-}
-
-const homeStyle: React.CSSProperties = {
-    display: "flex",
-    minHeight: "80vh",
-    minWidth: "90vw"
+  return (
+    <div className="home-container">
+      <SideBar />
+      <PageContent />
+    </div>
+  );
 }

@@ -1,56 +1,111 @@
-export default function PageContent() {
+import { useEffect, useState } from "react";
+import "./css/pageContent.css";
 
-    const elements = Array.from({ length: 20 }, (_, i) => `Content ${i + 1}`);
+/* ---------- Types ---------- */
 
-    return (
-        <div style={containerStyle}>
-            <h2 style={titleStyle}>✨ Page Content ✨</h2>
-
-            <div style={listStyle}>
-                {elements.map((item, index) => (
-                    <div
-                        key={index}
-                        style={elementStyle}
-                    >
-                        {item}
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+interface DashboardData {
+  transactions_today: number;
+  total_customers: number;
+  kyc_y1: number;
+  kyc_y2: number;
+  kyc_y3: number;
 }
 
+interface DashboardResponse {
+  status: string;
+  message: string;
+  data: DashboardData;
+}
 
-const containerStyle: React.CSSProperties = {
-    borderRadius: "24px",
-    padding: "1.5rem",
-    minWidth: "80%",
-    background: "linear-gradient(135deg, #0f172a, #1e293b)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-    textAlign: "center",
-};
+/* ---------- Component ---------- */
 
-const titleStyle: React.CSSProperties = {
-    color: "#e0f2fe",
-    marginBottom: "1rem",
-    letterSpacing: "1px",
-};
+export default function PageContent() {
+  const [stats, setStats] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const listStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "center",
-    gap: "1rem",
-    flexWrap: "wrap",
-    alignItems: "center"
-};
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/dashboard");
 
-const elementStyle: React.CSSProperties = {
-    padding: "0.75rem 1.5rem",
-    borderRadius: "100px",
-    background: "linear-gradient(150deg, #f59e0b, #f97316)",
-    color: "#1e293b",
-    fontWeight: 600,
-    cursor: "pointer",
-    // transition: "all 0.25s ease",
-    // boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-};
+        if (!res.ok) {
+          throw new Error("Failed to fetch dashboard data");
+        }
+
+        const json: DashboardResponse = await res.json();
+
+        if (json.status !== "00") {
+          throw new Error(json.message);
+        }
+
+        setStats(json.data);
+      } catch (err: unknown) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  /* ---------- UI States ---------- */
+
+  if (loading) {
+    return (
+      <main className="content">
+        <p>Loading dashboard...</p>
+      </main>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <main className="content">
+        <p className="error-text">Error: {error ?? "Unknown error"}</p>
+      </main>
+    );
+  }
+
+  /* ---------- Render ---------- */
+
+  return (
+    <main className="content">
+      <header className="content-header">
+        <h1>Dashboard</h1>
+        <p>Welcome back 👋</p>
+      </header>
+
+      <section className="stats">
+        {/* Transactions Today */}
+        <div className="stat-card">
+          <span className="stat-title">Transactions Today</span>
+          <strong className="stat-value">
+            {stats.transactions_today}
+          </strong>
+        </div>
+
+        {/* Total Customers */}
+        <div className="stat-card">
+          <span className="stat-title">Total Customers</span>
+          <strong className="stat-value">
+            {stats.total_customers}
+          </strong>
+        </div>
+
+        {/* KYC Status */}
+        <div className="stat-card">
+          <span className="stat-title">KYC Status</span>
+
+          <div className="kyc-breakdown">
+            <div>Y1 <strong>{stats.kyc_y1}</strong></div>
+            <div>Y2 <strong>{stats.kyc_y2}</strong></div>
+            <div>Y3 <strong>{stats.kyc_y3}</strong></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}

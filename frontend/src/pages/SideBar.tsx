@@ -1,15 +1,21 @@
-export default function SideBar() {
-    return (
-        <div style={style}>Side bar</div>
-    )
-}
+import "./css/sidebar.css";
 
-const style: React.CSSProperties = {
-    border: "5px solid red",
-    borderRadius: "200px",
-    minWidth: "15%",
-    textAlign: "center",
-    display: "flex",
-    justifyContent: 'center',
-    alignItems: "center"
+export default function SideBar() {
+  return (
+    <aside className="sidebar">
+      <h2 className="logo">PPIMS</h2>
+
+      <nav className="nav">
+        <button className="nav-item active">Dashboard</button>
+        <button className="nav-item">Customers</button>
+        <button className="nav-item">Transactions</button>
+        <button className="nav-item">Reports</button>
+        <button className="nav-item">Settings</button>
+      </nav>
+
+      <div className="sidebar-footer">
+        <span>v1.0.0</span>
+      </div>
+    </aside>
+  );
 }
